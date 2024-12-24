@@ -1,0 +1,8 @@
+[Plugin]
+Module=rb-discord
+IAge=2
+Name=Rhythmbox Discord RPC V2
+Description=Shows the music you're listening to on Discord.
+Authors=V3L0C1T13S
+Copyright=Copyright © 2024 V3L0C1T13S
+Website=https://github.com/V3L0C1T13S
