@@ -5,6 +5,7 @@ cmake = import('cmake')
 sources = [
     'plugin.cpp',
     'upload.cpp',
+    'track.cpp',
 ]
 
 rhythmbox_dep = dependency('rhythmbox')

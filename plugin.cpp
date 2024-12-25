@@ -1,13 +1,14 @@
 #include <rhythmbox/plugins/rb-plugin-macros.h>
-#include "rb_headers.h"
 #include <iostream>
 #include <mutex>
 #include <chrono>
-#include "discord_rpc.h"
-#include "track.hpp"
 #include <thread>
 #include <atomic>
 #include <string>
+#include <optional>
+#include "rb_headers.h"
+#include "discord_rpc.h"
+#include "track.hpp"
 #include "upload.hpp"
 
 #define CLIENT_ID "1212075104486301696"
@@ -31,6 +32,7 @@ struct RBDiscordPlugin
     RhythmDB *db;
     RhythmboxArtStore *art_store;
     RhythmDBEntry *playing_entry = nullptr;
+    std::optional<MusicTrack> current_track;
     std::atomic_bool running;
 };
 
@@ -99,15 +101,22 @@ void set_discord_music(MusicTrack music)
 {
     std::scoped_lock guard(presence_mutex);
 
-    auto current_time = time(NULL);
+    auto current_time = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     details = music.title;
-    state = "";
-    large_image_key = "logo";
-    large_image_text = "Rhythmbox";
-    small_image_key = "";
-    small_image_text = "";
-    start_timestamp = current_time;
-    end_timestamp = current_time + music.duration;
+    state = "by " + music.artist;
+    large_image_key = music.art_url != "" ? music.art_url : "logo";
+    large_image_text = music.album != "" ? music.album : "Rhythmbox";
+    if (music.playing) {
+        small_image_key = "";
+        small_image_text = "";
+        start_timestamp = current_time;
+        end_timestamp = music.get_remaining_seconds();
+    } else {
+        small_image_key = "pause";
+        small_image_text = "Paused";
+        start_timestamp = 0;
+        end_timestamp = 0;
+    }
 }
 
 void discord_rpc_init(RBDiscordPlugin *plugin)
@@ -144,24 +153,16 @@ void discord_rpc_destroy()
     Discord_Shutdown();
 }
 
-MusicTrack get_song_entry_data(RhythmDBEntry *entry)
-{
-    MusicTrack data = {
-        .title = rhythmdb_entry_get_string(entry, RHYTHMDB_PROP_TITLE),
-        .artist = rhythmdb_entry_get_string(entry, RHYTHMDB_PROP_ARTIST),
-        .album = rhythmdb_entry_get_string(entry, RHYTHMDB_PROP_ALBUM),
-        .duration = rhythmdb_entry_get_ulong(entry, RHYTHMDB_PROP_DURATION)};
-
-    return data;
-}
-
 static void rb_discord_plugin_init(RBDiscordPlugin *plugin) {};
 
-void upload_and_set_art_async(std::string filename)
+void upload_and_set_art_async(std::string filename, RBDiscordPlugin *self)
 {
     std::scoped_lock guard(presence_mutex);
     auto url = uploadFile(filename);
-    large_image_key = url;
+    if (self->current_track.has_value()) {
+        self->current_track.value().art_url = url;
+        large_image_key = url;
+    }
 }
 
 static void art_cb(RBExtDBKey *key, RBExtDBKey *store_key, const char *filename,
@@ -174,7 +175,7 @@ static void art_cb(RBExtDBKey *key, RBExtDBKey *store_key, const char *filename,
 
     if (rhythmdb_entry_matches_ext_db_key(self->db, entry, store_key))
     {
-        std::thread art_thread(upload_and_set_art_async, std::string(filename));
+        std::thread art_thread(upload_and_set_art_async, std::string(filename), self);
         art_thread.detach();
     }
 }
@@ -195,8 +196,8 @@ static void playing_entry_changed_cb(RBShellPlayer *player,
     self->playing_entry = entry;
     if (entry == nullptr)
         return;
-    auto data = get_song_entry_data(entry);
-
+    MusicTrack data(entry);
+    self->current_track = data;
     set_discord_music(data);
 
     get_art(self, entry);
@@ -205,9 +206,13 @@ static void playing_entry_changed_cb(RBShellPlayer *player,
 static void playing_changed_cb(RBShellPlayer *player, gboolean playing,
                                RBDiscordPlugin *self)
 {
-    if (self->playing_entry != nullptr)
+    if (self->current_track.has_value())
     {
-        // TODO
+        guint time;
+        
+        rb_shell_player_get_playing_time(player, &self->current_track.value().time, nullptr);
+        self->current_track.value().playing = playing;
+        set_discord_music(self->current_track.value());
     }
 }
 

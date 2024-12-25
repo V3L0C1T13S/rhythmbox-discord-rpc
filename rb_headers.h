@@ -1,3 +1,7 @@
+#pragma once
+
+#include <glib.h>
+
 typedef void* RBShell;
 typedef void* RBShellPlayer;
 typedef void* RhythmDB;
@@ -103,3 +107,4 @@ extern "C" RBExtDBKey *rhythmdb_entry_create_ext_db_key(RhythmDBEntry *entry, Rh
 extern "C" void rb_ext_db_request(RhythmDBEntry *entry, RBExtDBKey *key, RBExtDBRequestCallback cb, void *plugin, void *cb_2);
 extern "C" void rb_ext_db_key_free(RBExtDBKey *key);
 extern "C" bool rhythmdb_entry_matches_ext_db_key(RhythmDB *db, RhythmDBEntry *entry, RBExtDBKey *key);
+extern "C" void rb_shell_player_get_playing_time(RBShellPlayer *player, guint *time, GError *error);
