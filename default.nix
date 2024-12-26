@@ -32,7 +32,6 @@ in pkgs.mkShell {
     gst_all_1.gst-plugins-ugly
     gst_all_1.gst-libav
 
-    discord-rpc
     curl
   ];
   extraOutputsToInstall = [ "dev" ];
