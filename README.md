@@ -20,6 +20,7 @@ Ensure you install these dependencies:
 * curl
 * libpeas
 * rhythmbox
+* openssl
 
 Note for Nix users: this repository already comes with a default.nix - if you use Nix, simply run `nix-shell` to get a working dev environment.
 

@@ -10,10 +10,13 @@ in pkgs.mkShell {
 
   buildInputs = with pkgs; [
     rhythmbox
+    curl
+    libsoup_3
+    openssl
 
+    # rhythmbox deps
     glib
     gtk3
-    libsoup_3
     libpeas
     totem-pl-parser
     libgudev
@@ -22,15 +25,12 @@ in pkgs.mkShell {
     lirc
     brasero
     grilo
-
     gst_all_1.gstreamer
     gst_all_1.gst-plugins-base
     gst_all_1.gst-plugins-good
     gst_all_1.gst-plugins-bad
     gst_all_1.gst-plugins-ugly
     gst_all_1.gst-libav
-
-    curl
   ];
   extraOutputsToInstall = [ "dev" ];
 }

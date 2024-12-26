@@ -11,6 +11,7 @@ sources = [
 rhythmbox_dep = dependency('rhythmbox')
 libpeas_dep = dependency('libpeas-gtk-1.0')
 curl_dep = dependency('libcurl')
+openssl_dep = dependency('openssl')
 
 discord_rpc_opts = cmake.subproject_options()
 discord_rpc_opts.add_cmake_defines({
