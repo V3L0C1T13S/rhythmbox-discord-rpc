@@ -15,6 +15,8 @@ Make sure to recurse submodules when cloning.
 
 Ensure you install these dependencies:
 
+* meson
+* ninja
 * curl
 * libpeas
 * rhythmbox
