@@ -113,10 +113,9 @@ std::string uploadFile(const std::string &filename)
         curl_mime_free(mime);
         curl_easy_cleanup(curl);
 
-        using namespace std::chrono;
         upload_cache.insert({ hash, CachedFile({
             .url = response,
-            .expires_at = system_clock::now() + hours(1),
+            .expires_at = std::chrono::system_clock::now() + std::chrono::hours(1),
         }) });
     }
     else
