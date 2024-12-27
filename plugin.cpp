@@ -54,37 +54,34 @@ static std::string small_image_key = "";
 static std::string small_image_text = "";
 static long start_timestamp = 0;
 static long end_timestamp = 0;
-
-constexpr float update_interval = 0.5f;
-static std::chrono::time_point last_update = std::chrono::steady_clock::now();
+static bool presence_needs_update = false;
 
 std::thread discord_thread;
 
 void discord_rpc_update()
 {
-    if (std::chrono::duration_cast<std::chrono::duration<float>>(std::chrono::steady_clock::now() - last_update).count() < update_interval)
-        return;
-    last_update = std::chrono::steady_clock::now();
-
     if (!rpc_connected)
     {
         Discord_RunCallbacks();
         return;
     }
 
-    std::scoped_lock guard(presence_mutex);
+    if (presence_needs_update) {
+        std::scoped_lock guard(presence_mutex);
 
-    DiscordRichPresence discord_presence;
-    memset(&discord_presence, 0, sizeof(discord_presence));
-    discord_presence.details = details.c_str();
-    discord_presence.state = state.c_str();
-    discord_presence.largeImageKey = large_image_key.c_str();
-    discord_presence.largeImageText = large_image_text.c_str();
-    discord_presence.smallImageKey = small_image_key.c_str();
-    discord_presence.smallImageText = small_image_text.c_str();
-    discord_presence.startTimestamp = start_timestamp;
-    discord_presence.endTimestamp = end_timestamp;
-    Discord_UpdatePresence(&discord_presence);
+        DiscordRichPresence discord_presence;
+        memset(&discord_presence, 0, sizeof(discord_presence));
+        discord_presence.details = details.c_str();
+        discord_presence.state = state.c_str();
+        discord_presence.largeImageKey = large_image_key.c_str();
+        discord_presence.largeImageText = large_image_text.c_str();
+        discord_presence.smallImageKey = small_image_key.c_str();
+        discord_presence.smallImageText = small_image_text.c_str();
+        discord_presence.startTimestamp = start_timestamp;
+        discord_presence.endTimestamp = end_timestamp;
+        Discord_UpdatePresence(&discord_presence);
+        presence_needs_update = false;
+    }
 
     Discord_RunCallbacks();
 }
@@ -94,6 +91,7 @@ void discord_rpc_loop(const RBDiscordPlugin *plugin)
     while (plugin->running.load())
     {
         discord_rpc_update();
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
 }
 
@@ -117,6 +115,7 @@ void set_discord_music(MusicTrack music)
         start_timestamp = 0;
         end_timestamp = 0;
     }
+    presence_needs_update = true;
 }
 
 void discord_rpc_init(RBDiscordPlugin *plugin)
