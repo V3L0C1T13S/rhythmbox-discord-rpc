@@ -66,9 +66,9 @@ void discord_rpc_update()
         return;
     }
 
-    if (presence_needs_update) {
-        std::scoped_lock guard(presence_mutex);
+    std::scoped_lock guard(presence_mutex);
 
+    if (presence_needs_update) {
         DiscordRichPresence discord_presence;
         memset(&discord_presence, 0, sizeof(discord_presence));
         discord_presence.details = details.c_str();
