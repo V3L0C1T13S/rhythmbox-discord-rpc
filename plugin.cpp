@@ -156,11 +156,12 @@ static void rb_discord_plugin_init(RBDiscordPlugin *plugin) {};
 
 void upload_and_set_art_async(std::string filename, RBDiscordPlugin *self)
 {
-    std::scoped_lock guard(presence_mutex);
     auto url = uploadFile(filename);
     if (self->current_track.has_value()) {
+        std::scoped_lock guard(presence_mutex);
         self->current_track.value().art_url = url;
         large_image_key = url;
+        presence_needs_update = true;
     }
 }
 
