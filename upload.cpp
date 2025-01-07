@@ -18,7 +18,8 @@ std::unordered_map<std::string, CachedFile> upload_cache;
 std::string calculateFileHash(const std::string& filename) {
     std::ifstream file(filename, std::ios::binary);
     if (!file.is_open()) {
-        throw std::runtime_error("Unable to open file: " + filename);
+        std::cerr << "Unable to open file: " << filename << std::endl;
+        return "";
     }
 
     SHA256_CTX sha256;
@@ -70,7 +71,8 @@ std::string uploadFile(const std::string &filename)
         std::ifstream file(filename, std::ios::binary);
         if (!file.is_open())
         {
-            throw std::runtime_error("Unable to open file: " + filename);
+            std::cerr << "Unable to open file: " << filename << std::endl;
+            return "";
         }
 
         std::ostringstream oss;
@@ -107,7 +109,8 @@ std::string uploadFile(const std::string &filename)
         {
             curl_mime_free(mime);
             curl_easy_cleanup(curl);
-            throw std::runtime_error("Curl error: " + std::string(curl_easy_strerror(res)));
+            std::cerr << "Curl error: " << curl_easy_strerror(res) << std::endl;
+            return "";
         }
 
         curl_mime_free(mime);
@@ -120,7 +123,8 @@ std::string uploadFile(const std::string &filename)
     }
     else
     {
-        throw std::runtime_error("Unable to initialize CURL.");
+        std::cerr << "Unable to initialize CURL." << std::endl;
+        return "";
     }
 
     return response;
