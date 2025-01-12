@@ -100,10 +100,10 @@ typedef enum
 	RHYTHMDB_NUM_PROPERTIES
 } RhythmDBPropType;
 
-extern "C" RhythmboxArtStore *rb_ext_db_new(const char* name);
+extern "C" RhythmboxArtStore* rb_ext_db_new(const char* name);
 extern "C" const char* rhythmdb_entry_get_string(RhythmDBEntry *entry, RhythmDBPropType prop);
 extern "C" ulong rhythmdb_entry_get_ulong(RhythmDBEntry *entry, RhythmDBPropType prop);
-extern "C" RBExtDBKey *rhythmdb_entry_create_ext_db_key(RhythmDBEntry *entry, RhythmDBPropType prop);
+extern "C" RBExtDBKey* rhythmdb_entry_create_ext_db_key(RhythmDBEntry *entry, RhythmDBPropType prop);
 extern "C" void rb_ext_db_request(RhythmDBEntry *entry, RBExtDBKey *key, RBExtDBRequestCallback cb, void *plugin, void *cb_2);
 extern "C" void rb_ext_db_key_free(RBExtDBKey *key);
 extern "C" bool rhythmdb_entry_matches_ext_db_key(RhythmDB *db, RhythmDBEntry *entry, RBExtDBKey *key);
