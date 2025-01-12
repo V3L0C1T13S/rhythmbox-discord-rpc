@@ -6,6 +6,8 @@ in pkgs.mkShell {
     ninja
     pkg-config
     cmake
+    clang-tools
+    mesonlsp
   ];
 
   buildInputs = with pkgs; [
