@@ -1,3 +1,3 @@
 #include <string>
 
-std::string uploadFile(const std::string& filename);
+std::string uploadFile(const std::string &filename);

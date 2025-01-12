@@ -1,12 +1,12 @@
-#include <iostream>
+#include <chrono>
+#include <curl/curl.h>
 #include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <openssl/sha.h>
 #include <sstream>
 #include <string>
-#include <curl/curl.h>
-#include <iomanip>
 #include <unordered_map>
-#include <openssl/sha.h>
-#include <chrono>
 
 struct CachedFile {
     std::string url;
@@ -15,7 +15,7 @@ struct CachedFile {
 
 std::unordered_map<std::string, CachedFile> upload_cache;
 
-std::string calculateFileHash(const std::string& filename) {
+std::string calculateFileHash(const std::string &filename) {
     std::ifstream file(filename, std::ios::binary);
     if (!file.is_open()) {
         std::cerr << "Unable to open file: " << filename << std::endl;
@@ -43,15 +43,14 @@ std::string calculateFileHash(const std::string& filename) {
     return oss.str();
 }
 
-size_t WriteCallback(void *contents, size_t size, size_t nmemb, std::string *userp)
-{
+size_t WriteCallback(void *contents, size_t size, size_t nmemb,
+                     std::string *userp) {
     size_t totalSize = size * nmemb;
     userp->append(static_cast<char *>(contents), totalSize);
     return totalSize;
 }
 
-std::string uploadFile(const std::string &filename)
-{
+std::string uploadFile(const std::string &filename) {
     CURL *curl;
     CURLcode res;
     std::string response;
@@ -66,11 +65,9 @@ std::string uploadFile(const std::string &filename)
     }
 
     curl = curl_easy_init();
-    if (curl)
-    {
+    if (curl) {
         std::ifstream file(filename, std::ios::binary);
-        if (!file.is_open())
-        {
+        if (!file.is_open()) {
             std::cerr << "Unable to open file: " << filename << std::endl;
             return "";
         }
@@ -97,7 +94,9 @@ std::string uploadFile(const std::string &filename)
         curl_mime_filename(part, filename.c_str());
         curl_mime_data(part, fileContents.c_str(), fileContents.size());
 
-        curl_easy_setopt(curl, CURLOPT_URL, "https://litterbox.catbox.moe/resources/internals/api.php");
+        curl_easy_setopt(
+            curl, CURLOPT_URL,
+            "https://litterbox.catbox.moe/resources/internals/api.php");
         curl_easy_setopt(curl, CURLOPT_MIMEPOST, mime);
 
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
@@ -105,8 +104,7 @@ std::string uploadFile(const std::string &filename)
 
         res = curl_easy_perform(curl);
 
-        if (res != CURLE_OK)
-        {
+        if (res != CURLE_OK) {
             curl_mime_free(mime);
             curl_easy_cleanup(curl);
             std::cerr << "Curl error: " << curl_easy_strerror(res) << std::endl;
@@ -116,13 +114,13 @@ std::string uploadFile(const std::string &filename)
         curl_mime_free(mime);
         curl_easy_cleanup(curl);
 
-        upload_cache.insert({ hash, CachedFile({
-            .url = response,
-            .expires_at = std::chrono::system_clock::now() + std::chrono::hours(1),
-        }) });
-    }
-    else
-    {
+        upload_cache.insert(
+            {hash, CachedFile({
+                       .url = response,
+                       .expires_at = std::chrono::system_clock::now() +
+                                     std::chrono::hours(1),
+                   })});
+    } else {
         std::cerr << "Unable to initialize CURL." << std::endl;
         return "";
     }
