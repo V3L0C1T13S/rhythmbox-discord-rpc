@@ -1,6 +1,8 @@
 ccache
 rhythmbox
 gcc
+clang
+lld
 cmake
 meson
 ninja-build
