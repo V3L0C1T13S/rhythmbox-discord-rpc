@@ -1,0 +1,27 @@
+name: Build Debug
+on: [ workflow_dispatch ]
+
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+      options: --privileged
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          dnf install -y $(cat deps.list)
+      - name: Configure Ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: rhythmbox-${{ matrix.os }}
+      - name: Run build script
+        run: |
+          ./build.sh
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: rhythmbox-discord-rpc
+          path: build.tar.gz
