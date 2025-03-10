@@ -17,6 +17,9 @@ glib
 glib-devel
 gtk3
 gtk3-devel
+libpeas1
+libpeas1-devel
+libpeas1-gtk
 libpeas
 libpeas-devel
 totem-pl-parser
