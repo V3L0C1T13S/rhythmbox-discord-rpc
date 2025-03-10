@@ -1,7 +1,7 @@
 #!/bin/sh
 
 export PATH="/usr/lib64/ccache:$PATH"
-export CC=/usr/lib64/ccache/gcc CXX=/usr/lib64/ccache/gcc++
+export CC=/usr/lib64/ccache/gcc CXX=/usr/lib64/ccache/g++
 export CC_LD=lld CXX_LD=lld
 BUILD_DIRECTORY="./build"
 
