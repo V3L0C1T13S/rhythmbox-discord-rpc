@@ -8,6 +8,9 @@ jobs:
       image: fedora:latest
       options: --privileged
     steps:
+      - name: Install Git
+        run: |
+          dnf install -y git
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
